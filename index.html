@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rust Kick Overlay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Rajdhani:wght@600;700&display=swap">
     <style>
         * {
             margin: 0;
@@ -21,55 +23,131 @@
             top: 20px;
             right: 20px;
             display: flex;
-            gap: 15px;
+            align-items: stretch;
+            gap: 10px;
         }
 
+        /* ---- Divisor tipo cinta de peligro ---- */
+        .divider {
+            width: 7px;
+            border-radius: 3px;
+            background: repeating-linear-gradient(135deg, #f4b400 0 8px, #171412 8px 16px);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.6), inset 0 0 2px rgba(0,0,0,0.5);
+        }
+
+        /* ---- Panel de metal oxidado ---- */
         .counter-item {
             position: relative;
-            width: 80px;
-            height: 90px;
+            width: 88px;
+            min-height: 104px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(160deg, #332b22 0%, #1c1712 55%, #100d0a 100%);
+            border: 2px solid #5a3a22;
+            border-radius: 5px;
+            box-shadow:
+                inset 0 0 14px rgba(0, 0, 0, 0.75),
+                0 3px 10px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(206, 74, 33, 0.18);
             transition: all 0.3s ease;
-            padding: 0 5px;
         }
 
-        .counter-icon {
-            font-size: 36px;
-            margin-bottom: 4px;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+        /* Textura oxidada + rayones sutiles */
+        .counter-item::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(115deg, transparent 40%, rgba(255,255,255,0.035) 41%, transparent 42%),
+                linear-gradient(115deg, transparent 62%, rgba(255,255,255,0.025) 63%, transparent 64%),
+                radial-gradient(circle at 18% 22%, rgba(206, 74, 33, 0.22) 0%, transparent 10%),
+                radial-gradient(circle at 78% 60%, rgba(180, 60, 20, 0.18) 0%, transparent 11%),
+                radial-gradient(circle at 45% 88%, rgba(140, 50, 15, 0.15) 0%, transparent 8%);
         }
 
-        .counter-icon-img {
-            width: 45px;
-            height: 45px;
-            margin-bottom: 4px;
+        /* Remaches en las esquinas */
+        .rivet {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #dcdcdc, #5a5a5a 55%, #1e1e1e);
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.9);
+            z-index: 2;
+        }
+        .rivet.tl { top: 4px; left: 4px; }
+        .rivet.tr { top: 4px; right: 4px; }
+        .rivet.bl { bottom: 4px; left: 4px; }
+        .rivet.br { bottom: 4px; right: 4px; }
+
+        /* Franja de peligro superior */
+        .hazard-bar {
+            width: 100%;
+            height: 6px;
+            background: repeating-linear-gradient(135deg, #f4b400 0 8px, #171412 8px 16px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+        }
+
+        .icon-wrap {
+            margin-top: 4px;
+            font-size: 32px;
+            line-height: 1;
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
+        }
+
+        .icon-wrap img {
+            width: 30px;
+            height: 30px;
             object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8)) brightness(1.15) saturate(1.1);
+        }
+
+        .counter-label {
+            margin-top: 4px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #c98a5e;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
         }
 
         .counter-number {
-            color: #fff;
-            font-family: 'Arial Black', sans-serif;
-            font-size: 30px;
-            font-weight: bold;
-            border-radius: 30px;
-            min-width: 50px;
+            margin-top: 5px;
+            font-family: 'Black Ops One', 'Arial Black', sans-serif;
+            font-size: 22px;
+            letter-spacing: 1px;
+            color: #f5ead9;
             text-align: center;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            padding: 0 5px;
+            min-width: 44px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
         }
 
         .counter-number.kills {
-            background: rgb(255 0 0 / 90%);
-            box-shadow: 0 2px 8px rgb(255 0 0 / 50%);
+            background: linear-gradient(180deg, #d9541f, #8f3413);
+            border: 1px solid #ffb066;
+            box-shadow: 0 0 10px rgba(217, 84, 31, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
         .counter-number.deaths {
-            background: rgb(30 30 30 / 90%);
-            box-shadow: 0 2px 8px rgb(0 0 0 / 50%);
+            background: linear-gradient(180deg, #4a4a4a, #1c1c1c);
+            border: 1px solid #8a1f1f;
+            box-shadow: 0 0 10px rgba(138, 31, 31, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        /* Pulso sutil cuando se actualiza un contador */
+        .counter-item.pulse {
+            animation: pulse 0.4s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.08); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -79,9 +157,6 @@
     </div>
 
     <script>
-        // Ícono para el contador de muertes
-        const DEATH_ICON = 'https://cdn-icons-png.flaticon.com/512/1301/1301675.png';
-
         // Estado del overlay
         let state = {
             kills: 0,
@@ -99,15 +174,24 @@
         };
 
         // Renderizar contadores en el DOM
-        function renderCounters() {
+        function renderCounters(pulseType) {
             const container = document.getElementById('gamesContainer');
             container.innerHTML = `
-                <div class="counter-item">
-                    <div class="counter-icon">💀</div>
+                <div class="counter-item ${pulseType === 'kill' ? 'pulse' : ''}">
+                    <span class="rivet tl"></span><span class="rivet tr"></span>
+                    <span class="rivet bl"></span><span class="rivet br"></span>
+                    <div class="hazard-bar"></div>
+                    <div class="icon-wrap">💀</div>
+                    <div class="counter-label">KILLS</div>
                     <div class="counter-number kills">${state.kills}</div>
                 </div>
-                <div class="counter-item">
-                    <img src="${DEATH_ICON}" alt="Muertes" class="counter-icon-img">
+                <div class="divider"></div>
+                <div class="counter-item ${pulseType === 'muerte' ? 'pulse' : ''}">
+                    <span class="rivet tl"></span><span class="rivet tr"></span>
+                    <span class="rivet bl"></span><span class="rivet br"></span>
+                    <div class="hazard-bar"></div>
+                    <div class="icon-wrap">⚰️</div>
+                    <div class="counter-label">MUERTES</div>
                     <div class="counter-number deaths">${state.deaths}</div>
                 </div>
             `;
@@ -121,7 +205,7 @@
                 state.deaths = Math.max(0, state.deaths + change);
             }
             console.log('🎯', type, change, '->', type === 'kill' ? state.kills : state.deaths);
-            renderCounters();
+            renderCounters(type);
         }
 
         // Obtener información del canal
